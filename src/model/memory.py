@@ -4,7 +4,7 @@
 
 # Classes -------------------------------------------------------------------
 ## Atmega Memory Structure
-class AtmegaMemory:
+class AVRMemory:
     # Instance variables
     size = 0
 
@@ -44,15 +44,17 @@ class AtmegaMemory:
 # Main function -------------------------------------------------------------
 ## Main (for testing purposes)
 if __name__=="__main__":
-    mem = AtmegaMemory(32768)
+    mem = AVRMemory(32768)
     print mem
 
+    print "8-bit addressing"
     print "%(val)02X" % {"val" : mem.read_memory_byte(0x00)}
     mem.write_memory_byte(0x00, 0xAA)
     mem.write_memory_byte(0x01, 0x55)
     print "%(val)02X" % {"val" : mem.read_memory_byte(0x00)}
     print "%(val)04X" % {"val" : mem.read_memory_word(0x00)}
 
+    print "16-bit addressing"
     print "%(val)04X" % {"val" : mem.read_memory_word(0x01)}
     mem.write_memory_word(0x01, 0xDEAD)
     print "%(val)04X" % {"val" : mem.read_memory_word(0x01)}

@@ -4,7 +4,7 @@
 
 # Classes -------------------------------------------------------------------
 ## ATmega Flag Class
-class AtmegaFlags:
+class AVRFlags:
     # Instance variables
     character = ""
     bitmask = 0
@@ -41,7 +41,7 @@ class AtmegaFlags:
         return self.value
     
 ## ATmega Status Register Class
-class AtmegaSREG:
+class AVRSREG:
     # Instance variables
     flags = [None] * 8
     status_reg = 0b00000000
@@ -50,14 +50,14 @@ class AtmegaSREG:
     # Initialization
     def __init__(self):
         # Setup the flags in the status register
-        self.flags[0] = AtmegaFlags("C", 0b00000001, "Carry Flag")
-        self.flags[1] = AtmegaFlags("Z", 0b00000010, "Zero Flag")
-        self.flags[2] = AtmegaFlags("N", 0b00000100, "Negative Flag")
-        self.flags[3] = AtmegaFlags("V", 0b00001000, "Overflow Flag")
-        self.flags[4] = AtmegaFlags("S", 0b00010000, "Sign Flag")
-        self.flags[5] = AtmegaFlags("H", 0b00100000, "Half Carry")
-        self.flags[6] = AtmegaFlags("T", 0b01000000, "Bit Copy")
-        self.flags[7] = AtmegaFlags("I", 0b10000000, "Interrupt Flag")
+        self.flags[0] = AVRFlags("C", 0b00000001, "Carry Flag")
+        self.flags[1] = AVRFlags("Z", 0b00000010, "Zero Flag")
+        self.flags[2] = AVRFlags("N", 0b00000100, "Negative Flag")
+        self.flags[3] = AVRFlags("V", 0b00001000, "Overflow Flag")
+        self.flags[4] = AVRFlags("S", 0b00010000, "Sign Bit (N xor V)")
+        self.flags[5] = AVRFlags("H", 0b00100000, "Half Carry Flag")
+        self.flags[6] = AVRFlags("T", 0b01000000, "Bit Copy Storage")
+        self.flags[7] = AVRFlags("I", 0b10000000, "Global Interrupt Enable")
 
         # Set the default value of the status register
         status_reg = 0b00000000
@@ -112,7 +112,7 @@ class AtmegaSREG:
 # Main Function -------------------------------------------------------------
 ## Main (for testing purposes)
 if __name__ == "__main__":
-    sreg = AtmegaSREG()
+    sreg = AVRSREG()
     print sreg
     print "%(sreg)02X" % {"sreg" : sreg.get_sreg()}
     sreg.set_flag("C")
