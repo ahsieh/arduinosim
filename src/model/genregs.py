@@ -114,8 +114,10 @@ class AVRGeneralPurposeWorkingRegisters:
 class AVRStackPointerRegister:
     # Override methods
     # Initialization
-    def __init__(self):
+    def __init__(self, ram_size):
         self.sp = [0x00] * 2    # 16-bit stack pointer register
+        self.ram_size = ram_size
+        self.write_sp(ram_size - 1)
 
     # String Representation
     def __str__(self):
@@ -126,16 +128,17 @@ class AVRStackPointerRegister:
     # Instance functions
     # Write to Stack Pointer Register
     def write_sp(self, value):
+        value = value & (self.ram_size - 1)
         self.sp[0] = value & 0xFF
         self.sp[1] = (value >> 8) & 0xFF
 
     # Write to Stack Pointer Register Low Byte (SPL)
     def write_spl(self, value):
-        self.sp[0] = value & 0xFF
+        self.sp[0] = value & 0xFF & (self.ram_size - 1)
 
     # Write to Stack Pointer Register High Byte (SPH)
     def write_sph(self, value):
-        self.sp[1] = value & 0xFF
+        self.sp[1] = value & 0xFF & ((self.ram_size - 1) >> 8)
 
     # Read from Stack Pointer Register
     def read_sp(self):
@@ -301,7 +304,7 @@ if __name__=="__main__":
     print regs
 
     print "Testing Stack Pointer Register"
-    sp = AVRStackPointerRegister()
+    sp = AVRStackPointerRegister(32768)
     print sp
     sp.write_sp(0xDEAD)
     print "%(val)04X" % { "val" : sp.read_sp() }
