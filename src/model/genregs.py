@@ -21,6 +21,45 @@ class AVRGeneralPurposeWorkingRegisters:
         return retstr
 
     # Instance functions
+    # Increment register value
+    def incr_reg(self, index):
+        self.R[index] = (self.R[index] + 1) & 0xFF
+
+    # Decrement register value
+    def decr_reg(self, index):
+        self.R[index] = (self.R[index] - 1) & 0xFF
+
+    # Add to register value (no carry)
+    def add_reg(self, index, value):
+        value = value & 0xFF
+        self.R[index] = (self.R[index] + value) & 0xFF
+
+    # Add to register value (with carry)
+    # Return 1 if carry should be set, 0 otherwise
+    def addc_reg(self, index, value):
+        retval = 0
+        value = value & 0xFF
+        summation = self.R[index] + value
+        if (summation & 0x100 > 0):
+            retval = 1
+        self.R[index] = summation & 0xFF
+        return retval
+
+    # Subtract from register value (no carry)
+    def sub_reg(self, index, value):
+        value = value & 0xFF
+        self.R[index] = (self.R[index] - value) & 0xFF
+
+    # Subtract from register value (with carry)
+    def subc_reg(self, index, value):
+        retval = 0
+        value = value & 0xFF
+        subtraction = self.R[index] - value
+        if (subtraction < 0):
+            retval = 1
+        self.R[index] = subtraction & 0xFF
+        return retval
+
     # Write to a register
     def write_reg(self, index, value):
         self.R[index] = value & 0xFF
@@ -126,6 +165,18 @@ class AVRStackPointerRegister:
         return "SP: %(v)04X" % { "v" : (val_high | val_low) }
 
     # Instance functions
+    # Increment Stack Pointer 
+    def incr_sp(self, inc):
+        val = self.read_sp()
+        val = val + inc
+        self.write_sp(val)
+
+    # Decrement Stack Pointer 
+    def decr_sp(self, dec):
+        val = self.read_sp()
+        val = val - dec
+        self.write_sp(val)
+
     # Write to Stack Pointer Register
     def write_sp(self, value):
         value = value & (self.ram_size - 1)
@@ -301,6 +352,10 @@ if __name__=="__main__":
     regs.write_reg(31, 0xAB)
     print "%(val)04X" % {"val" : regs.read_zreg()}
 
+    regs.incr_reg(30)
+    regs.decr_reg(31)
+    print "%(val)04X" % {"val" : regs.read_zreg()}
+
     print regs
 
     print "Testing Stack Pointer Register"
@@ -312,6 +367,15 @@ if __name__=="__main__":
     print "%(val)02X" % { "val" : sp.read_sph() }
     sp.write_spl(0xAA)
     sp.write_sph(0x55)
+    print "%(val)04X" % { "val" : sp.read_sp() }
+
+    sp.incr_sp(1)
+    print "%(val)04X" % { "val" : sp.read_sp() }
+    sp.incr_sp(2)
+    print "%(val)04X" % { "val" : sp.read_sp() }
+    sp.decr_sp(1)
+    print "%(val)04X" % { "val" : sp.read_sp() }
+    sp.decr_sp(2)
     print "%(val)04X" % { "val" : sp.read_sp() }
     
     print "Testing Status Register"
