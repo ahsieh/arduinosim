@@ -3,8 +3,8 @@
 # Imports -------------------------------------------------------------------
 
 # Classes -------------------------------------------------------------------
-## Atmega Memory Structure
-class AVRRegisters:
+## Atmega General Purpose Working Registers
+class AVRGeneralPurposeWorkingRegisters:
     # Instance variables
     size = 0
 
@@ -15,7 +15,7 @@ class AVRRegisters:
 
     # String Representation
     def __str__(self):
-        retstr = "AVR Registers\r\n"
+        retstr = "AVR General Purpose Working Registers\r\n"
         for i in xrange(32):
             retstr = retstr + "R[" + str(i) + "] = " + str(self.R[i]) + "\r\n"
         return retstr
@@ -110,10 +110,51 @@ class AVRRegisters:
     def read_zhreg(self):
         return self.R[31] & 0xFF
 
+## Atmega Stack Pointer Register
+class AVRStackPointerRegister:
+    # Override methods
+    # Initialization
+    def __init__(self):
+        self.sp = [0x00] * 2    # 16-bit stack pointer register
+
+    # String Representation
+    def __str__(self):
+        val_low = self.sp[0] & 0xFF
+        val_high = (self.sp[1] << 8) & 0xFF00
+        return "SP: %(v)04X" % { "v" : (val_high | val_low) }
+
+    # Instance functions
+    # Write to Stack Pointer Register
+    def write_sp(self, value):
+        self.sp[0] = value & 0xFF
+        self.sp[1] = (value >> 8) & 0xFF
+
+    # Write to Stack Pointer Register Low Byte (SPL)
+    def write_spl(self, value):
+        self.sp[0] = value & 0xFF
+
+    # Write to Stack Pointer Register High Byte (SPH)
+    def write_sph(self, value):
+        self.sp[1] = value & 0xFF
+
+    # Read from Stack Pointer Register
+    def read_sp(self):
+        val_low = self.sp[0] & 0xFF
+        val_high = (self.sp[1] << 8) & 0xFF00
+        return (val_high | val_low)
+
+    # Read from Stack Pointer Register Low Byte (SPL)
+    def read_spl(self):
+        return self.sp[0]
+
+    # Read from Stack Pointer Register High Byte (SPH)
+    def read_sph(self):
+        return self.sp[1]
+
 # Main function -------------------------------------------------------------
 ## Main (for testing purposes)
 if __name__=="__main__":
-    regs = AVRRegisters()
+    regs = AVRGeneralPurposeWorkingRegisters()
     print regs
 
     print "Testing X register"
@@ -150,4 +191,15 @@ if __name__=="__main__":
     print "%(val)04X" % {"val" : regs.read_zreg()}
 
     print regs
+
+    print "Testing Stack Pointer Register"
+    sp = AVRStackPointerRegister()
+    print sp
+    sp.write_sp(0xDEAD)
+    print "%(val)04X" % { "val" : sp.read_sp() }
+    print "%(val)02X" % { "val" : sp.read_spl() }
+    print "%(val)02X" % { "val" : sp.read_sph() }
+    sp.write_spl(0xAA)
+    sp.write_sph(0x55)
+    print "%(val)04X" % { "val" : sp.read_sp() }
 
