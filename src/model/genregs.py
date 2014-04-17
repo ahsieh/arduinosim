@@ -1,168 +1,170 @@
 #!/usr/bin/python
 
 # Imports -------------------------------------------------------------------
+from avr_reg import AVRRegister
 
 # Classes -------------------------------------------------------------------
+
+
 ## Atmega General Purpose Working Registers
 class AVRGeneralPurposeWorkingRegisters:
     # Instance variables
-    size = 0
+    start_address = 0x0000
 
     # Override methods
     # Initialization
-    def __init__(self):
-        self.R = [0x00] * 32    # 32 General Purpose Registers
+    def __init__(self, start_address):
+        self.R = []
+        for x in xrange(start_address, start_address + 32):
+            self.R.append(AVRRegister(x))
+        self.start_address = start_address
 
     # String Representation
     def __str__(self):
-        retstr = "AVR General Purpose Working Registers\r\n"
+        retstr = "AVR General Purpose Working Registers [0x%(addr)02X]\r\n" \
+                % { "addr" : self.start_address }
         for i in xrange(32):
-            retstr = retstr + "R[" + str(i) + "] = " + str(self.R[i]) + "\r\n"
+            retstr = retstr + str(self.R[i]) + "\r\n"
         return retstr
 
     # Instance functions
     # Increment register value
     def incr_reg(self, index):
-        self.R[index] = (self.R[index] + 1) & 0xFF
+        self.R[index].incr()
 
     # Decrement register value
     def decr_reg(self, index):
-        self.R[index] = (self.R[index] - 1) & 0xFF
+        self.R[index].decr()
 
     # Add to register value (no carry)
     def add_reg(self, index, value):
-        value = value & 0xFF
-        self.R[index] = (self.R[index] + value) & 0xFF
+        self.R[index].add(value)
 
     # Add to register value (with carry)
     # Return 1 if carry should be set, 0 otherwise
     def addc_reg(self, index, value):
-        retval = 0
-        value = value & 0xFF
-        summation = self.R[index] + value
-        if (summation & 0x100 > 0):
-            retval = 1
-        self.R[index] = summation & 0xFF
-        return retval
+        return self.R[index].add(value)
 
     # Subtract from register value (no carry)
     def sub_reg(self, index, value):
-        value = value & 0xFF
-        self.R[index] = (self.R[index] - value) & 0xFF
+        self.R[index].sub(value)
 
     # Subtract from register value (with carry)
     def subc_reg(self, index, value):
-        retval = 0
-        value = value & 0xFF
-        subtraction = self.R[index] - value
-        if (subtraction < 0):
-            retval = 1
-        self.R[index] = subtraction & 0xFF
-        return retval
+        return self.R[index].sub(value)
 
     # Write to a register
     def write_reg(self, index, value):
-        self.R[index] = value & 0xFF
+        self.R[index].write(value)
 
     # Read from a register
     def read_reg(self, index):
-        return self.R[index] & 0xFF
+        return self.R[index].read()
 
     # Write to the X-register
     def write_xreg(self, value):
-        self.R[26] = value & 0xFF
-        self.R[27] = (value >> 8) & 0xFF
+        self.R[26].write(value)
+        self.R[27].write(value >> 8)
 
     # Write to the X-register Low Byte
     def write_xlreg(self, value):
-        self.R[26] = value & 0xFF
+        self.R[26].write(value)
 
     # Write to the X-register High Byte
     def write_xhreg(self, value):
-        self.R[27] = (value >> 8) & 0xFF
+        self.R[27].write(value)
 
     # Read from the X-register
     def read_xreg(self):
-        low = self.R[26] & 0xFF
-        high = (self.R[27] << 8) & 0xFF00
+        low = self.R[26].read()
+        high = self.R[27].read() << 8
         return (high | low)
 
     # Read from the X-register Low Byte
     def read_xlreg(self):
-        return self.R[26] & 0xFF
+        return self.R[26].read()
 
     # Read from the X-register High Byte
     def read_xhreg(self):
-        return self.R[27] & 0xFF
+        return self.R[27].read()
 
     # Write to the Y-register
     def write_yreg(self, value):
-        self.R[28] = value & 0xFF
-        self.R[29] = (value >> 8) & 0xFF
+        self.R[28].write(value)
+        self.R[29].write(value >> 8)
 
     # Write to the Y-register Low Byte
     def write_ylreg(self, value):
-        self.R[28] = value & 0xFF
+        self.R[28].write(value)
 
     # Write to the Y-register High Byte
     def write_yhreg(self, value):
-        self.R[29] = (value >> 8) & 0xFF
+        self.R[29].write(value)
 
     # Read from the Y-register
     def read_yreg(self):
-        low = self.R[28] & 0xFF
-        high = (self.R[29] << 8) & 0xFF00
+        low = self.R[28].read()
+        high = self.R[29].read() << 8
         return (high | low)
 
     # Read from the Y-register Low Byte
     def read_ylreg(self):
-        return self.R[28] & 0xFF
+        return self.R[28].read()
 
     # Read from the Y-register High Byte
     def read_yhreg(self):
-        return self.R[29] & 0xFF
+        return self.R[29].read()
 
     # Write to the Z-register
     def write_zreg(self, value):
-        self.R[30] = value & 0xFF
-        self.R[31] = (value >> 8) & 0xFF
+        self.R[30].write(value)
+        self.R[31].write(value >> 8)
 
     # Write to the Z-register Low Byte
     def write_zlreg(self, value):
-        self.R[30] = value & 0xFF
+        self.R[30].write(value)
 
     # Write to the Z-register High Byte
     def write_zhreg(self, value):
-        self.R[31] = (value >> 8) & 0xFF
+        self.R[31].write(value)
 
     # Read from the Z-register
     def read_zreg(self):
-        low = self.R[30] & 0xFF
-        high = (self.R[31] << 8) & 0xFF00
+        low = self.R[30].read()
+        high = self.R[31].read() << 8
         return (high | low)
 
     # Read from the Z-register Low Byte
     def read_zlreg(self):
-        return self.R[30] & 0xFF
+        return self.R[30].read()
 
     # Read from the Z-register High Byte
     def read_zhreg(self):
-        return self.R[31] & 0xFF
+        return self.R[31].read()
 
 ## Atmega Stack Pointer Register
 class AVRStackPointerRegister:
+    # Instance variables
+    address = 0x03D
+
     # Override methods
     # Initialization
-    def __init__(self, ram_size):
-        self.sp = [0x00] * 2    # 16-bit stack pointer register
+    def __init__(self, address, ram_size):
+        bm_msb = ((ram_size - 1) >> 8) & 0xFF
+        bm_lsb = (ram_size - 1) & 0xFF
+        self.sp = []
+        self.sp.append(AVRRegister(address, 0x00, bm_lsb, bm_lsb))
+        self.sp.append(AVRRegister(address, 0x00, bm_msb, bm_msb))
+        self.address = address
         self.ram_size = ram_size
         self.write_sp(ram_size - 1)
 
     # String Representation
     def __str__(self):
-        val_low = self.sp[0] & 0xFF
-        val_high = (self.sp[1] << 8) & 0xFF00
-        return "SP: %(v)04X" % { "v" : (val_high | val_low) }
+        val_low = self.sp[0].read()
+        val_high = self.sp[1].read() << 8
+        return "SP[0x%(addr)02X]: %(v)04X" % \
+                { "addr" : self.address , "v" : (val_high | val_low) }
 
     # Instance functions
     # Increment Stack Pointer 
@@ -180,30 +182,30 @@ class AVRStackPointerRegister:
     # Write to Stack Pointer Register
     def write_sp(self, value):
         value = value & (self.ram_size - 1)
-        self.sp[0] = value & 0xFF
-        self.sp[1] = (value >> 8) & 0xFF
+        self.sp[0].write(value)
+        self.sp[1].write(value >> 8)
 
     # Write to Stack Pointer Register Low Byte (SPL)
     def write_spl(self, value):
-        self.sp[0] = value & 0xFF & (self.ram_size - 1)
+        self.sp[0].write(value)
 
     # Write to Stack Pointer Register High Byte (SPH)
     def write_sph(self, value):
-        self.sp[1] = value & 0xFF & ((self.ram_size - 1) >> 8)
+        self.sp[1].write(value >> 8)
 
     # Read from Stack Pointer Register
     def read_sp(self):
-        val_low = self.sp[0] & 0xFF
-        val_high = (self.sp[1] << 8) & 0xFF00
+        val_low = self.sp[0].read()
+        val_high = self.sp[1].read() << 8
         return (val_high | val_low)
 
     # Read from Stack Pointer Register Low Byte (SPL)
     def read_spl(self):
-        return self.sp[0]
+        return self.sp[0].read()
 
     # Read from Stack Pointer Register High Byte (SPH)
     def read_sph(self):
-        return self.sp[1]
+        return self.sp[1].read()
 
 ## ATmega Flag Class
 class AVRSregFlags:
@@ -247,10 +249,11 @@ class AVRSreg:
     # Instance variables
     flags = [None] * 8
     status_reg = 0b00000000
+    address = 0x0000
 
     # Override methods
     # Initialization
-    def __init__(self):
+    def __init__(self, address):
         # Setup the flags in the status register
         self.flags[0] = AVRSregFlags("C", 0b00000001, "Carry Flag")
         self.flags[1] = AVRSregFlags("Z", 0b00000010, "Zero Flag")
@@ -262,11 +265,14 @@ class AVRSreg:
         self.flags[7] = AVRSregFlags("I", 0b10000000, "Global Interrupt Enable")
 
         # Set the default value of the status register
-        status_reg = 0b00000000
+        self.status_reg = 0b00000000
+
+        # Set the address of the register
+        self.address = address
 
     # String Representation
     def __str__(self):
-        retstr = ""
+        retstr = "SREG[0x%(addr)02X]\r\n" % { "addr" : self.address }
         for i in xrange(8):
             retstr = retstr + str(self.flags[i]) + "\r\n"
         return retstr
@@ -315,7 +321,7 @@ class AVRSreg:
 # Main function -------------------------------------------------------------
 ## Main (for testing purposes)
 if __name__=="__main__":
-    regs = AVRGeneralPurposeWorkingRegisters()
+    regs = AVRGeneralPurposeWorkingRegisters(0x000)
     print regs
 
     print "Testing General Purporse Working Registers"
@@ -359,7 +365,7 @@ if __name__=="__main__":
     print regs
 
     print "Testing Stack Pointer Register"
-    sp = AVRStackPointerRegister(32768)
+    sp = AVRStackPointerRegister(0x03D, 32768)
     print sp
     sp.write_sp(0xDEAD)
     print "%(val)04X" % { "val" : sp.read_sp() }
@@ -379,7 +385,7 @@ if __name__=="__main__":
     print "%(val)04X" % { "val" : sp.read_sp() }
     
     print "Testing Status Register"
-    sreg = AVRSreg()
+    sreg = AVRSreg(0x03F)
     print sreg
     print "%(sreg)02X" % {"sreg" : sreg.get_sreg()}
     sreg.set_flag("C")
