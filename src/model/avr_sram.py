@@ -59,9 +59,29 @@ class AVRDataMemory:
         for mem in self.memory:
           retstr = retstr + str(mem) + "\r\n"
         return retstr
+
+    # Instance methods
+    # Read memory contents (byte addressed)
+    def read_byte(self, addr):
+        return self.memory[addr].read()
+
+    # Write to memory (byte addressed)
+    def write_byte(self, addr, data):
+        self.memory[addr].write(data)
+
+    # Read memory contents (word addressed)
+    def read_word(self, addr):
+        retval = (self.memory[addr].read() << 8) & 0xFF00
+        retval = retval + self.memory[addr + 1].read()
+        return retval
         
 # Main function -------------------------------------------------------------
 ## Main (for testing purposes)
 if __name__=="__main__":
     sram = AVRDataMemory("arch/atmega328p.def")
-    print sram
+    sram.write_byte(0x1A, 0xDE)
+    sram.write_byte(0x1B, 0xAD)
+    print "0x%(val)02X" % { "val" : sram.read_byte(0x1A) }
+    print "0x%(val)02X" % { "val" : sram.read_byte(0x1B) }
+    print "0x%(val)04X" % { "val" : sram.read_word(0x1A) }
+    #print sram

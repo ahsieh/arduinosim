@@ -1,3 +1,7 @@
+;
+; ATmega328p Definition File for Arduinosim
+;
+
 ; Part Name
 NAME = ATmega328p
 

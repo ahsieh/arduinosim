@@ -27,15 +27,15 @@ class AVRMemoryByte:
     # TODO
 
     # Instance methods
-    # Read memister contents
+    # Read memory contents
     def read(self):
         return self.contents & self.read_bitmask
 
-    # Modify memister contents
+    # Modify memory contents
     def write(self, contents):
         self.contents = contents & self.write_bitmask
 
-    # Increment memister contents
+    # Increment memory contents
     # Return 1 if overflow occurs, 0 otherwise
     def incr(self):
         retval = 0
@@ -45,7 +45,7 @@ class AVRMemoryByte:
         self.contents = result & self.write_bitmask
         return retval
 
-    # Decrement memister contents
+    # Decrement memory contents
     # Return 1 if overflow occurs, 0 otherwise
     def decr(self):
         retval = 0
@@ -55,7 +55,7 @@ class AVRMemoryByte:
         self.contents = result & self.write_bitmask
         return retval
 
-    # Add to memister contents
+    # Add to memory contents
     # Return 1 if overflow occurs, 0 otherwise
     def add(self, value):
         retval = 0
@@ -65,7 +65,7 @@ class AVRMemoryByte:
         self.contents = result & self.write_bitmask
         return retval
 
-    # Subtract from memister contents
+    # Subtract from memory contents
     # Return 1 if overflow occurs, 0 otherwise
     def sub(self, value):
         retval = 0
@@ -109,11 +109,4 @@ if __name__=="__main__":
     print "Decrementing memory byte (should be 0xFE, no overflow/carry)"
     ovf = mem.decr()
     print str(mem) + " overflow: " + str(ovf)
-
-    print "............................"
-    mems = []
-    for x in xrange(32):
-        mems.append(AVRMemoryByte(x))
-    for x in xrange(len(mems)):
-        print mems[x]
 
