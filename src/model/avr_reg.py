@@ -10,15 +10,16 @@ class AVRRegister(AVRMemoryByte):
 
     # Override methods
     # Initialization
-    def __init__(self, addr, contents=0x00, rd_bm=0xFF, wr_bm=0xFF):
+    def __init__(self, addr, name, contents=0x00, rd_bm=0xFF, wr_bm=0xFF):
         AVRMemoryByte.__init__(self, addr, contents)
+        self.name = name
         self.read_bitmask = rd_bm
         self.write_bitmask = wr_bm
 
     # String Representation
     def __str__(self):
-        return "reg@0x%(addr)02X: 0x%(val)02X" % \
-                { "addr" : self.addr , "val" : self.read() }
+        return "%(reg)s@0x%(addr)02X: 0x%(val)02X" % \
+                { "reg" : self.name, "addr" : self.addr , "val" : self.read() }
 
     # Instance methods
     # Set bits in register
@@ -36,7 +37,7 @@ class AVRRegister(AVRMemoryByte):
 ## Main (for testing purposes)
 if __name__=="__main__":
     print "Creating new register object"
-    reg = AVRRegister(0x00)
+    reg = AVRRegister(0x00, "R0")
     print reg
 
     print "Writing 0x55 to register"
