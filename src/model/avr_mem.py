@@ -4,18 +4,18 @@
 
 # Classes -------------------------------------------------------------------
 ## Generic Register Object
-class AVRRegister:
+class AVRMemoryByte:
     # Instance variables
     size_in_bytes = 1
-    start_addr = 0x0000
+    addr = 0x0000
     contents = 0x00
     read_bitmask = 0xFF
     write_bitmask = 0xFF
 
     # Override methods
     # Initialization
-    def __init__(self, start_addr, contents=0x00, rd_bm=0xFF, wr_bm=0xFF):
-        self.start_addr = start_addr
+    def __init__(self, addr, contents=0x00, rd_bm=0xFF, wr_bm=0xFF):
+        self.addr = addr
         self.contents = contents & 0xFF
         self.read_bitmask = rd_bm
         self.write_bitmask = wr_bm
@@ -23,7 +23,7 @@ class AVRRegister:
     # String Representation
     def __str__(self):
         return "reg@0x%(addr)02X: 0x%(val)02X" % \
-                { "addr" : self.start_addr , "val" : self.read() }
+                { "addr" : self.addr , "val" : self.read() }
 
     # Object Comparison
     # TODO
@@ -91,7 +91,7 @@ class AVRRegister:
 # Main function -------------------------------------------------------------
 ## Main (for testing purposes)
 if __name__=="__main__":
-    reg = AVRRegister(0x00)
+    reg = AVRMemoryByte(0x00)
     print reg
     reg.write(0xAA)
     print reg
@@ -115,7 +115,7 @@ if __name__=="__main__":
     print "............................"
     regs = []
     for x in xrange(32):
-        regs.append(AVRRegister(x))
+        regs.append(AVRMemoryByte(x))
     for x in xrange(len(regs)):
         print regs[x]
 
