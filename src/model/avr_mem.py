@@ -14,11 +14,9 @@ class AVRMemoryByte:
 
     # Override methods
     # Initialization
-    def __init__(self, addr, contents=0x00, rd_bm=0xFF, wr_bm=0xFF):
+    def __init__(self, addr, contents=0x00):
         self.addr = addr
         self.contents = contents & 0xFF
-        self.read_bitmask = rd_bm
-        self.write_bitmask = wr_bm
 
     # String Representation
     def __str__(self):
