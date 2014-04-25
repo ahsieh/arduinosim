@@ -64,10 +64,7 @@ class AVRDataMemory:
                                     else:
                                         write_bm = int(words[3].strip())
 
-                                    print memptr
-                                    print addr 
                                     if (memptr == addr):
-                                        print addr 
                                         memptr = memptr + 1
                                         self.memory.append(AVRRegister(addr, \
                                                regname, 0, read_bm, write_bm))
@@ -92,12 +89,12 @@ class AVRDataMemory:
                     self.sram_size = 512
 
                 # Lastly, add the internal SRAM to the data memory
-                print memptr
                 sram_start = memptr
                 sram_end = sram_start + self.sram_size
                 for addr in xrange(sram_start, sram_end):
                   self.memory.append(AVRMemoryByte(addr))
 
+            print "Closing file"
             f.close()
         except:
             print "Err: File does not exist!"
