@@ -18,7 +18,7 @@ class AVRRegister(AVRMemoryByte):
 
     # String Representation
     def __str__(self):
-        return "%(reg)s@0x%(addr)02X: 0x%(val)02X" % \
+        return "%(reg)s @0x%(addr)02X: 0x%(val)02X" % \
                 { "reg" : self.name, "addr" : self.addr , "val" : self.read() }
 
     # Instance methods

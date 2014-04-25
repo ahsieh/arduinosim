@@ -14,6 +14,8 @@ class AVRDataMemory:
     # Initialization
     def __init__(self, def_filename):
         try:
+            errflag = 0
+
             # First, initialize the memory by adding all the
             # standard registers.
             memptr = 0
@@ -37,19 +39,66 @@ class AVRDataMemory:
                             #  the standard registers, IO register, and
                             #  external IO registers
                             self.sram_size = int(words[2])
-                            print "SRAM size: " + str(self.sram_size)
+                        else:
+                            # Register definitions:
+                            # Error check to make sure these are valid.
+                            if (len(words) == 4):
+                                try:
+                                    if (words[0].strip()[:2] == "0x" or \
+                                                words[0].strip()[:2] == "0X"):
+                                        addr = int(words[0].strip(), 16)
+                                    else:
+                                        addr = int(words[0].strip())
 
-            # If SRAM wasn't defined, we default to the lowest
-            #  value.
-            if self.sram_size == 0:
-                self.sram_size = 512
+                                    regname = str(words[1].strip())
 
-            # Lastly, add the internal SRAM to the data memory
-            sram_start = memptr
-            sram_end = sram_start + self.sram_size
-            for addr in xrange(sram_start, sram_end):
-              self.memory.append(AVRMemoryByte(addr))
+                                    if (words[2].strip()[:2] == "0x" or \
+                                                words[0].strip()[:2] == "0X"):
+                                        read_bm = int(words[2].strip(), 16)
+                                    else:
+                                        read_bm = int(words[2].strip())
 
+                                    if (words[3].strip()[:2] == "0x" or \
+                                                words[3].strip()[:2] == "0X"):
+                                        write_bm = int(words[3].strip(), 16)
+                                    else:
+                                        write_bm = int(words[3].strip())
+
+                                    print memptr
+                                    print addr 
+                                    if (memptr == addr):
+                                        print addr 
+                                        memptr = memptr + 1
+                                        self.memory.append(AVRRegister(addr, \
+                                               regname, 0, read_bm, write_bm))
+                                    else:
+                                        print "**Error: missing register at " + \
+                                                "address " + str(memptr)
+                                        errflag = 1
+                                        break
+                                except:
+                                    print "**Error: definition file has errors"
+                                    errflag = 1
+                                    break
+
+            if (errflag == 1):
+                # Error occured! Return an object with NO memory
+                self.memory = []
+                self.sram_size = 0
+            else:
+                # If SRAM wasn't defined, we default to the lowest
+                #  value.
+                if self.sram_size == 0:
+                    self.sram_size = 512
+
+                # Lastly, add the internal SRAM to the data memory
+                print memptr
+                sram_start = memptr
+                sram_end = sram_start + self.sram_size
+                for addr in xrange(sram_start, sram_end):
+                  self.memory.append(AVRMemoryByte(addr))
+
+            f.close()
         except:
             print "Err: File does not exist!"
 
@@ -79,9 +128,10 @@ class AVRDataMemory:
 ## Main (for testing purposes)
 if __name__=="__main__":
     sram = AVRDataMemory("arch/atmega328p.def")
-    sram.write_byte(0x1A, 0xDE)
-    sram.write_byte(0x1B, 0xAD)
-    print "0x%(val)02X" % { "val" : sram.read_byte(0x1A) }
-    print "0x%(val)02X" % { "val" : sram.read_byte(0x1B) }
-    print "0x%(val)04X" % { "val" : sram.read_word(0x1A) }
-    #print sram
+    if (sram.sram_size != 0):
+        sram.write_byte(0x1A, 0xDE)
+        sram.write_byte(0x1B, 0xAD)
+        print "0x%(val)02X" % { "val" : sram.read_byte(0x1A) }
+        print "0x%(val)02X" % { "val" : sram.read_byte(0x1B) }
+        print "0x%(val)04X" % { "val" : sram.read_word(0x1A) }
+        print sram

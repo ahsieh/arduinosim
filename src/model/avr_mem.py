@@ -20,7 +20,7 @@ class AVRMemoryByte:
 
     # String Representation
     def __str__(self):
-        return "mem@0x%(addr)02X: 0x%(val)02X" % \
+        return "mem @0x%(addr)02X: 0x%(val)02X" % \
                 { "addr" : self.addr , "val" : self.read() }
 
     # Object Comparison
