@@ -94,7 +94,6 @@ class AVRDataMemory:
                 for addr in xrange(sram_start, sram_end):
                   self.memory.append(AVRMemoryByte(addr))
 
-            print "Closing file"
             f.close()
         except:
             print "Err: File does not exist!"
@@ -131,4 +130,5 @@ if __name__=="__main__":
         print "0x%(val)02X" % { "val" : sram.read_byte(0x1A) }
         print "0x%(val)02X" % { "val" : sram.read_byte(0x1B) }
         print "0x%(val)04X" % { "val" : sram.read_word(0x1A) }
+        sram.write_byte(0x8F0, 0xAC)
         print sram
