@@ -13,6 +13,9 @@ class AVRFlash:
     # Initialization
     def __init__(self, def_filename):
         try:
+            self.flash = []
+            errflag = 0
+
             # Open file for reading
             f = open(def_filename, "r")
 
@@ -23,7 +26,6 @@ class AVRFlash:
                     if (len(words) > 0):
                         if (words[0] == "FLASH" and words[1] == "="):
                             try:
-                                print words[2]
                                 self.flash_size = int(words[2].strip())
                                 break
                             except:
@@ -33,7 +35,6 @@ class AVRFlash:
 
             #
             if (errflag == 1):
-                self.flash = []
                 self.flash_size = 0
             else:
                 if self.flash_size == 0:
@@ -59,17 +60,22 @@ class AVRFlash:
     # Instance methods
     # Read memister contents
     def read(self, addr):
-        return self.flash[addr].read()
+        if (addr < self.flash_size):
+            return self.flash[addr].read()
+        return 0x0000
 
     # Modify memister contents
     def write(self, addr, data):
-        self.flash[addr].write(data)
+        if (addr < self.flash_size):
+            self.flash[addr].write(data)
 
 # Main function -------------------------------------------------------------
 ## Main (for testing purposes)
 if __name__=="__main__":
     flash = AVRFlash("arch/atmega328p.def")
     if (flash.flash_size != 0):
-        print "Hurray!"
+        flash.write(0x7FE, 0xDEAD)
+        flash.write(0x7FF, 0xBEAF)
+        print flash
 
 

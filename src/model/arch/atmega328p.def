@@ -6,10 +6,14 @@
 NAME = ATmega328p
 
 ; Flash size (ex. 32768 for 32kB)
-FLASH = 32768
+;FLASH = 32768
+FLASH = 2048
 
 ; SRAM size (ex. 2048 for 2kB)
 SRAM = 2048
+
+; System Clock Speed (Hz)
+SYSCLK = 16000000
 
 ; IO register definitions:
 ;|---------+--------------+--------------+---------------|
