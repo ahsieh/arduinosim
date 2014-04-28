@@ -6,7 +6,7 @@ from avr_reg import AVRRegister
 
 # Classes -------------------------------------------------------------------
 ## Atmega Memory Structure
-class AVRDataMemory:
+class AVRDataMemory(object):
     # Instance variables
     sram_size = 0
 

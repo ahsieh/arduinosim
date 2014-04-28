@@ -82,7 +82,7 @@ SYSCLK = 16000000
   0x5C      RESERVED       0xFF           0x00
   0x5D      SPL            0xFF           0x00
   0x5E      SPH            0xFF           0x00
-  0x5F      SREG           0xFF           0x00
+  0x5F      SREG           0xFF           0xFF
 
 
 ; External IO register definitions:

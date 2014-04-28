@@ -4,7 +4,7 @@
 
 # Classes -------------------------------------------------------------------
 ## Generic Register Object
-class AVRMemoryByte:
+class AVRMemoryByte(object):
     # Instance variables
     size_in_bytes = 1
     addr = 0x0000

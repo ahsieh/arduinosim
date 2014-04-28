@@ -5,7 +5,7 @@ from avr_flashmem import AVRFlashWord
 
 # Classes -------------------------------------------------------------------
 ## Generic Register Object
-class AVRFlash:
+class AVRFlash(object):
     # Instance variables
     flash_size = 0
 
@@ -58,13 +58,18 @@ class AVRFlash:
     # TODO
 
     # Instance methods
-    # Read memister contents
+    # Get the flash word object
+    def get(self, addr):
+        if (addr < self.flash_size):
+            return self.flash[addr]
+
+    # Read flash contents
     def read(self, addr):
         if (addr < self.flash_size):
             return self.flash[addr].read()
         return 0x0000
 
-    # Modify memister contents
+    # Modify flash contents
     def write(self, addr, data):
         if (addr < self.flash_size):
             self.flash[addr].write(data)

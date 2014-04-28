@@ -4,7 +4,7 @@
 
 # Classes -------------------------------------------------------------------
 ## Generic Register Object
-class AVRFlashWord:
+class AVRFlashWord(object):
     # Instance variables
     addr = 0x0000
     contents = 0x0000
