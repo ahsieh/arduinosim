@@ -36,6 +36,18 @@ class AVRInstructionDecoder(object):
                 self.instruction_str = "NOP"
                 self.operand1_str = ""
                 self.operand2_str = ""
+            elif ((opcode_val & 0b1111111100000000) == 0b0000000100000000):
+                # MOVW (Copy Register Word)
+                Rd0 = ((opcode_val & 0x00F0) >> 4) * 2
+                Rd1 = Rd0 + 1
+                Rr0 = (opcode_val & 0x000F) * 2
+                Rr1 = Rr0 + 1
+                self.data_memory.memory[Rd1] = self.data_memory.memory[Rr1]
+                self.data_memory.memory[Rd0] = self.data_memory.memory[Rr0]
+
+                self.instruction_str = "MOVW"
+                self.operand1_str = "r" + str(Rd1) + ":" + str(Rd0)
+                self.operand2_str = "r" + str(Rr1) + ":" + str(Rr0)
             elif ((opcode_val & 0b1111111100001111) == 0b1001010000001000):
                 # Set/Clear bit in SREG
                 bit = (opcode_val & 0x0070) >> 4
@@ -75,6 +87,7 @@ if __name__=="__main__":
         flash = AVRFlash(def_file)
         flash.write(0, 0b1001010000001000)
         flash.write(1, 0b1001010000101000)
+        flash.write(2, 0b0000000100010011)
         program_counter = AVRProgramCounter()
         decoder = AVRInstructionDecoder(sram, program_counter)
         decoder.load(flash.get(program_counter.read()))
