@@ -94,6 +94,9 @@ class AVRDataMemory(object):
                 for addr in xrange(sram_start, sram_end):
                   self.memory.append(AVRMemoryByte(addr))
 
+                # Set the stack pointer to the top of SRAM
+                self.write_sp(sram_end - 1)
+
             f.close()
         except:
             print "Err: File does not exist!"
@@ -116,9 +119,50 @@ class AVRDataMemory(object):
 
     # Read memory contents (word addressed)
     def read_word(self, addr):
-        retval = (self.memory[addr].read() << 8) & 0xFF00
-        retval = retval + self.memory[addr + 1].read()
+        retval = (self.memory[addr + 1].read() << 8) & 0xFF00
+        retval = retval + self.memory[addr].read()
         return retval
+
+    # Write memory contents (word addressed)
+    def write_word(self, addr, data):
+        data_lo = data & 0xFF
+        data_hi = (data >> 8) & 0xFF
+        self.memory[addr].write(data_lo)
+        self.memory[addr + 1].write(data_hi)
+
+    # Set Stack Pointer
+    def write_sp(self, val):
+        try:
+            spl = next(r for r in self.memory if r.name == "SPL")
+            sph = next(r for r in self.memory if r.name == "SPH")
+            val_lo = val & 0xFF
+            val_hi = (val >> 8) & 0xFF
+            spl.write(val_lo)
+            sph.write(val_hi)
+        except:
+            pass
+
+    # Get Stack Pointer
+    def read_sp(self):
+        try:
+            spl = next(r for r in self.memory if r.name == "SPL")
+            sph = next(r for r in self.memory if r.name == "SPH")
+            val_lo = spl.read()
+            val_hi = sph.read()
+            val = (val_hi << 8) + val_lo
+            return val
+        except:
+            return 0
+
+    # Decrement Stack Pointer
+    def dec_sp(self, dec):
+        val = self.read_sp()
+        self.write_sp(val - dec)
+
+    # Increment Stack Pointer
+    def inc_sp(self, inc):
+        val = self.read_sp()
+        self.write_sp(val + inc)
 
     # DEBUG - Print the contents of a general register 
     def debug_print_genreg(self, r):
@@ -142,6 +186,13 @@ class AVRDataMemory(object):
         try:
             reg = next(r for r in self.memory if r.name == "SREG")
             print reg
+        except:
+            pass
+
+    # DEBUG - Print SP
+    def debug_print_sp(self):
+        try:
+            print "SP 0x%(sp)03X" % { "sp" : self.read_sp() }
         except:
             pass
         

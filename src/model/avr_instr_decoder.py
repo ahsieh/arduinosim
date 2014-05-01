@@ -85,6 +85,13 @@ class AVRInstructionDecoder(object):
                 if (opcode_val & 0b0001000000000000):
                     # Call - TODO Stack stuffz
                     self.instruction_str = "RCALL"
+                    ram_addr = self.data_memory.read_sp()
+                    if (self.data_memory.sram_size < 0x10000):
+                        ram_addr = ram_addr - 1
+                        self.data_memory.write_word(ram_addr, self.program_counter.read())
+                        self.data_memory.dec_sp(2)
+                    else:
+                        pass  # Not handled yet!
                 else:
                     # Jump
                     self.instruction_str = "RJMP"
@@ -97,6 +104,19 @@ class AVRInstructionDecoder(object):
                     self.program_counter.add(opcode_val & 0x07FF)
                     self.operand1_str = "+" + str(opcode_val & 0x07FF)
 
+            elif ((opcode_val & 0b1111111100001111) == 0b1001010100001000):
+                # Misc. (RET, RETI, )
+                if (self.data_memory.sram_size < 0x1000):
+                    if (opcode_val & 0x00F0 == 0):
+                        self.data_memory.inc_sp(2)
+                        ram_addr = self.data_memory.read_sp() - 1
+                        new_pc = self.data_memory.read_word(ram_addr)
+                        self.program_counter.write(new_pc)
+                        self.instruction_str = "RET"
+                    else:
+                        pass
+                else:
+                    pass  # Not handled yet!
 
             # ----- END BIG IF/ELIF STATEMENT -----
 
@@ -126,6 +146,9 @@ if __name__=="__main__":
         flash.write(4, 0b1001010000011010)
         flash.write(5, 0b1100000000000000 + 5)
         flash.write(11, 0b1001010001011010)
+        flash.write(12, 0b1101000000000000 + 5)
+        flash.write(13, 0b1001010000001010)
+        flash.write(18, 0b1001010100001000)
         program_counter = AVRProgramCounter()
         decoder = AVRInstructionDecoder(sram, program_counter)
 
@@ -137,3 +160,4 @@ if __name__=="__main__":
         print "========= Final Results =========="
         sram.debug_print_genregs()
         sram.debug_print_sreg()
+        sram.debug_print_sp()
