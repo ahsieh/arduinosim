@@ -119,6 +119,31 @@ class AVRDataMemory(object):
         retval = (self.memory[addr].read() << 8) & 0xFF00
         retval = retval + self.memory[addr + 1].read()
         return retval
+
+    # DEBUG - Print the contents of a general register 
+    def debug_print_genreg(self, r):
+        if (0 <= r and r <= 32):
+            retstr = "Contents of R:" + str(r) + "\r\n"
+            retstr = retstr + "---------------\r\n"
+            retstr = retstr + str(self.memory[r]) + "\r\n"
+            print retstr
+
+    # DEBUG - Print the contents of general registers (default range: R0-R32)
+    def debug_print_genregs(self, r1=0, r2=32):
+        if (r1 <= r2 and 0 <= r1 and r1 < 32 and 0 <= r2 and r2 <= 32):
+            retstr = "Contents of R" + str(r1) + " - R" + str(r2) + ":\r\n"
+            retstr = retstr + "---------------------\r\n"
+            for r in xrange(r1, r2):
+                retstr = retstr + str(self.memory[r]) + "\r\n"
+            print retstr
+
+    # DEBUG - Print SREG
+    def debug_print_sreg(self):
+        try:
+            reg = next(r for r in self.memory if r.name == "SREG")
+            print reg
+        except:
+            pass
         
 # Main function -------------------------------------------------------------
 ## Main (for testing purposes)

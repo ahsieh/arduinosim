@@ -24,13 +24,29 @@ class AVRFlashWord(object):
     # TODO
 
     # Instance methods
-    # Read memister contents
+    # Read flash word contents
     def read(self):
         return self.contents & self.bitmask
 
-    # Modify memister contents
+    # Modify flash word contents
     def write(self, contents):
         self.contents = contents & self.bitmask
+
+    # Read flash low byte contents
+    def read_lo(self):
+        return self.contents & 0x00FF
+
+    # Write flash low byte contents
+    def write_lo(self, contents):
+        self.contents = (self.contents & 0xFF00) + (contents & 0x00FF)
+
+    # Read flash high byte contents
+    def read_hi(self):
+        return (self.contents >> 8) & 0x00FF
+
+    # Write flash high byte contents
+    def write_hi(self, contents):
+        self.contents = (self.contents & 0x00FF) + ((contents << 8) & 0xFF00)
 
 # Main function -------------------------------------------------------------
 ## Main (for testing purposes)
