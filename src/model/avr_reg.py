@@ -68,6 +68,14 @@ class AVRRegister(AVRMemoryByte):
         self.contents = self.contents >> 1
         return retval
 
+    # 1's compliment
+    def ones_compliment(self):
+        self.contents = (0xFF - self.contents) & self.write_bitmask
+
+    # 2's compliment
+    def negate(self):
+        self.contents = (0x00 - self.contents) & self.write_bitmask
+
     # Nibble swap
     # TODO?
 

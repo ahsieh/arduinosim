@@ -56,21 +56,20 @@ class AVRInstructionDecoder(object):
                 self.operand2_str = "r" + str(Rr1) + ":" + str(Rr0)
 
             elif ((opcode_val & 0b1111111100001111) == 0b1001010000001000):
-                # Set/Clear bit in SREG
+                # Find SREG
+                try:
+                    reg = next(r for r in self.data_memory.memory if r.name == "SREG")
+                except:
+                    pass
+
+               # Set/Clear bit in SREG
                 bit = (opcode_val & 0x0070) >> 4
                 if (opcode_val & 0x80):
                     self.instruction_str = "CLx"
-                    mask = ~(1 << bit)
+                    reg.clear_bits(1 << bit)
                 else:
                     self.instruction_str = "SEx"
-                    mask = 1 << bit
-
-                # Update SREG
-                try:
-                    reg = next(r for r in self.data_memory.memory if r.name == "SREG")
-                    reg.set_bits(mask)
-                except:
-                    pass
+                    reg.set_bits(1 << bit)
 
             elif ((opcode_val & 0b1111111000001111) == 0b1001010000001010):
                 # Decrement register
@@ -79,6 +78,27 @@ class AVRInstructionDecoder(object):
                 self.instruction_str = "DEC"
                 self.operand1_str = "r" + str(Rd)
 
+            elif ((opcode_val & 0b1111111000001000) == 0b1001010000000000):
+                # 1-Operand Instructions (COM, NEG, SWAP, INC, etc.)
+                Rd = ((opcode_val & 0x01F0) >> 4)
+                if (opcode_val & 0x07 == 0b011):
+                    # INC (increment)
+                    self.data_memory.memory[Rd].incr() # Carry flag NOT affected
+                    self.instruction_str = "INC"
+                    self.operand1_str = "r" + str(Rd)
+                elif (opcode_val & 0x07 == 0b000):
+                    # COM (1's compliment)
+                    self.data_memory.memory[Rd].ones_compliment()
+                    self.instruction_str = "COM"
+                    self.operand1_str = "r" + str(Rd)
+                elif (opcode_val & 0x07 == 0b001):
+                    # NEG (2's compliment)
+                    self.data_memory.memory[Rd].negate()
+                    self.instruction_str = "NEG"
+                    self.operand1_str = "r" + str(Rd)
+                else:
+                    pass
+                    
             elif ((opcode_val & 0b1100000000000000) == 0b1100000000000000):
                 # Relative Jump/Call
                 offset = opcode_val & 0x0FFF
@@ -107,12 +127,24 @@ class AVRInstructionDecoder(object):
             elif ((opcode_val & 0b1111111100001111) == 0b1001010100001000):
                 # Misc. (RET, RETI, )
                 if (self.data_memory.sram_size < 0x1000):
-                    if (opcode_val & 0x00F0 == 0):
+                    if (((opcode_val & 0x00F0) >> 4) == 0b0000):
+                        # RET
                         self.data_memory.inc_sp(2)
                         ram_addr = self.data_memory.read_sp() - 1
                         new_pc = self.data_memory.read_word(ram_addr)
                         self.program_counter.write(new_pc)
                         self.instruction_str = "RET"
+                    elif (((opcode_val & 0x00F0) >> 4) == 0b0001):
+                        # RETI (TODO set I flag in SREG)
+                        self.data_memory.inc_sp(2)
+                        ram_addr = self.data_memory.read_sp() - 1
+                        new_pc = self.data_memory.read_word(ram_addr)
+                        self.program_counter.write(new_pc)
+                        self.instruction_str = "RETI"
+                    elif (((opcode_val & 0x00F0) >> 4) == 0b1000):
+                        # SLEEP
+                        # TODO check documentation
+                        pass
                     else:
                         pass
                 else:
@@ -139,16 +171,24 @@ if __name__=="__main__":
     sram = AVRDataMemory(def_file)
     if (sram.sram_size != 0):
         flash = AVRFlash(def_file)
-        flash.write(0, 0b1001010000001000)
-        flash.write(1, 0b1001010000101000)
-        flash.write(2, 0b0000000100010011)
-        flash.write(3, 0b1001010000001010)
-        flash.write(4, 0b1001010000011010)
-        flash.write(5, 0b1100000000000000 + 5)
-        flash.write(11, 0b1001010001011010)
-        flash.write(12, 0b1101000000000000 + 5)
-        flash.write(13, 0b1001010000001010)
-        flash.write(18, 0b1001010100001000)
+        flash.write(0, 0b1001010000001000)          # SEC
+        flash.write(1, 0b1001010000101000)          # SEN
+        flash.write(2, 0b0000000100010011)          # MOVW  r3:2, r7:6
+        flash.write(3, 0b1001010000001010)          # DEC   r0
+        flash.write(4, 0b1001010000011010)          # DEC   r1
+        flash.write(5, 0b1100000000000000 + 5)      # RJMP  +5
+        flash.write(11, 0b1001010001011010)         # DEC   r5
+        flash.write(12, 0b1101000000000000 + 5)     # RCALL +5
+        flash.write(13, 0b1001010000001010)         # DEC   r0
+        flash.write(18, 0b1001010010001000)         # CLC
+        flash.write(19, 0b1001010111100011)         # INC   r30
+        flash.write(20, 0b1001010000001010)         # DEC   r0
+        flash.write(21, 0b0000000100010000)         # MOVW  r3:2, r1:0
+        flash.write(22, 0b1001010000000000)         # COM   r0
+        flash.write(23, 0b1001010000010001)         # NEG   r1
+        flash.write(24, 0b1001010100001000)         # RET
+        """
+        """
         program_counter = AVRProgramCounter()
         decoder = AVRInstructionDecoder(sram, program_counter)
 
