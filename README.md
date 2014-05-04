@@ -9,7 +9,6 @@ Current set of instructions implemented:
 | Mnemonic |       Description       | Implemented? |
 | -------- | ----------------------- |:------------:|
 |      **ARITHMETIC AND LOGIC INSTRUCTIONS**      |||
-|
 | COM      | 1's compliment          |       x      |
 | NEG      | 2's compliment          |       x      |
 | INC      | Increment register      |       x      |
