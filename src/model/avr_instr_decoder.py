@@ -55,14 +55,33 @@ class AVRInstructionDecoder(object):
                 self.operand1_str = "r" + str(Rd1) + ":" + str(Rd0)
                 self.operand2_str = "r" + str(Rr1) + ":" + str(Rr0)
 
+            elif ((opcode_val & 0b1111110000000000) == 0b0000110000000000):
+                # ADD (Add two registers)
+                Rd = (opcode_val & 0x01F0) >> 4
+                Rr = (opcode_val & 0x000F) + ((opcode_val & 0x0200) >> 5)
+                self.data_memory.memory[Rd].add(self.data_memory.memory[Rr].read())
+                self.instruction_str = "ADD"
+                self.operand1_str = "r" + str(Rd)
+                self.operand2_str = "r" + str(Rr)
+
+            elif ((opcode_val & 0b1111110000000000) == 0b0001110000000000):
+                # ADC (Add with carry)
+                Rd = (opcode_val & 0x01F0) >> 4
+                Rr = (opcode_val & 0x000F) + ((opcode_val & 0x0200) >> 5)
+                carry = self.data_memory.memory[Rd].add(self.data_memory.memory[Rr].read())
+                if (carry):
+                    self.data_memory.memory[Rd].incr()
+                self.instruction_str = "ADC"
+                self.operand1_str = "r" + str(Rd)
+                self.operand2_str = "r" + str(Rr)
+
             elif ((opcode_val & 0b1111111100001111) == 0b1001010000001000):
-                # Find SREG
+                # Set/Clear bit in SREG
                 try:
                     reg = next(r for r in self.data_memory.memory if r.name == "SREG")
                 except:
                     pass
 
-               # Set/Clear bit in SREG
                 bit = (opcode_val & 0x0070) >> 4
                 if (opcode_val & 0x80):
                     self.instruction_str = "CLx"
@@ -186,7 +205,11 @@ if __name__=="__main__":
         flash.write(21, 0b0000000100010000)         # MOVW  r3:2, r1:0
         flash.write(22, 0b1001010000000000)         # COM   r0
         flash.write(23, 0b1001010000010001)         # NEG   r1
-        flash.write(24, 0b1001010100001000)         # RET
+        flash.write(24, 0b0000110000000001)         # ADD   r0, r1
+        flash.write(25, 0b1001010000001000)         # SEC
+        flash.write(26, 0b0001110000000010)         # ADC   r0, r2
+        flash.write(27, 0b1001010010001000)         # CLC
+        flash.write(28, 0b1001010100001000)         # RET
         """
         """
         program_counter = AVRProgramCounter()
@@ -194,6 +217,7 @@ if __name__=="__main__":
 
         while (decoder.instruction_str != "NOP"):
             decoder.load(flash.get(program_counter.read()))
+            #print sram.memory[0]
             print decoder
 
         # 
