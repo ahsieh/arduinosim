@@ -37,11 +37,56 @@ Current set of instructions implemented:
 | FMUL     | Fractional multiply unsigned        |              |
 | FMULS    | Fractional mulitply signed          |              |
 | FMULSU   | Fractional multiply signed/unsigned |              |
-|          |                                     |              |
 |                    **BRANCH INSTRUCTIONS**                  |||
+| RJMP     | Relative jump                       |       x      |
+| IJMP     | Indirect jump to (Z)                |       x      |
+| JMP      | Direct jump                         |              |
+| RCALL    | Relative subroutine call            |       x      |
+| ICALL    | Indirect call to (Z)                |       x      |
+| CALL     | Direct subroutine call              |              |
 | RET      | Subroutine return                   |       x      |
 | RETI     | Interrupt return                    |       x      |
+| CPSE     |                                     |              |
+| CP       |                                     |              |
+| CPC      |                                     |              |
+| CPI      |                                     |              |
+| SBRC     |                                     |              |
+| SBRS     |                                     |              |
+| SBIC     |                                     |              |
+| SBIS     |                                     |              |
+| BRBS     |                                     |              |
+| BRBC     |                                     |              |
+| BREQ     |                                     |              |
+| BRNE     |                                     |              |
+| BRCS     |                                     |              |
+| BRCC     |                                     |              |
+| BRSH     |                                     |              |
+| BRLO     |                                     |              |
+| BRMI     |                                     |              |
+| BRPL     |                                     |              |
+| BRGE     |                                     |              |
+| BRLT     |                                     |              |
+| BRHS     |                                     |              |
+| BRHC     |                                     |              |
+| BRTS     |                                     |              |
+| BRTC     |                                     |              |
+| BRVS     |                                     |              |
+| BRVC     |                                     |              |
+| BRIE     |                                     |              |
+| BRID     |                                     |              |
 |              **BIT AND BIT-TEST INSTRUCTIONS**              |||
+| SBI      |                                     |              |
+| CBI      |                                     |              |
+| LSL      |                                     |              |
+| LSR      |                                     |              |
+| ROL      |                                     |              |
+| ROR      |                                     |              |
+| ASR      |                                     |              |
+| SWAP     |                                     |              |
+| BSET     |                                     |              |
+| BCLR     |                                     |              |
+| BST      |                                     |              |
+| BLD      |                                     |              |
 | SEC      |                                     |       x      |
 | CLC      |                                     |       x      |
 | SEN      |                                     |       x      |
@@ -59,7 +104,42 @@ Current set of instructions implemented:
 | SEH      |                                     |       x      |
 | CLH      |                                     |       x      |
 |                 **DATA TRANSFER INSTRUCTIONS**              |||
+| MOV      |                                     |              |
 | MOVW     | Copy register word                  |       x      |
+| LDI      | Load immediate                      |       x      |
+| LD       |                                     |              |
+| LD       |                                     |              |
+| LD       |                                     |              |
+| LD       |                                     |              |
+| LD       |                                     |              |
+| LD       |                                     |              |
+| LDD      |                                     |              |
+| LD       |                                     |              |
+| LD       |                                     |              |
+| LD       |                                     |              |
+| LDD      |                                     |              |
+| LDS      |                                     |              |
+| ST       |                                     |              |
+| ST       |                                     |              |
+| ST       |                                     |              |
+| ST       |                                     |              |
+| ST       |                                     |              |
+| ST       |                                     |              |
+| STD      |                                     |              |
+| ST       |                                     |              |
+| ST       |                                     |              |
+| ST       |                                     |              |
+| STD      |                                     |              |
+| STS      |                                     |              |
+| LPM      |                                     |              |
+| LPM      |                                     |              |
+| LPM      |                                     |              |
+| SPM      |                                     |              |
+| IN       |                                     |              |
+| OUT      |                                     |              |
+| PUSH     |                                     |              |
+| POP      |                                     |              |
 |                 **MCU CONTROL INSTRUCTIONS**                |||
 | NOP      | No operation                        |       x      |
 | SLEEP    |                                     |       x      |
+|          |                                     |              |

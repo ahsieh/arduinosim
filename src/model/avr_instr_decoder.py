@@ -90,6 +90,15 @@ class AVRInstructionDecoder(object):
                     self.instruction_str = "SEx"
                     reg.set_bits(1 << bit)
 
+            elif ((opcode_val & 0b1111000000000000) == 0b1110000000000000):
+                # Load Immediate (r16 - r31 only)
+                Rd = ((opcode_val & 0x00F0) >> 4) + 16
+                k = ((opcode_val & 0x0F00) >> 4) + (opcode_val & 0x000F)
+                self.data_memory.memory[Rd].write(k)
+                self.instruction_str = "LDI"
+                self.operand1_str = "r" + str(Rd)
+                self.operand2_str = "$" + str(k)
+
             elif ((opcode_val & 0b1111111000001111) == 0b1001010000001010):
                 # Decrement register
                 Rd = ((opcode_val & 0x01F0) >> 4)
@@ -118,7 +127,29 @@ class AVRInstructionDecoder(object):
                 else:
                     pass
                     
-            elif ((opcode_val & 0b1100000000000000) == 0b1100000000000000):
+            elif ((opcode_val & 0b1111111011111111) == 0b1001010000001001):
+                # Indirect Jump/Call
+                new_pc = (self.data_memory.memory[31].read() << 8) & 0xFF00
+                new_pc = new_pc + self.data_memory.memory[30].read() - 1
+                
+                if (opcode_val & 0b0000000100000000):
+                    # Call
+                    self.instruction_str = "ICALL"
+                    ram_addr = self.data_memory.read_sp()
+                    if (self.data_memory.sram_size < 0x10000):
+                        ram_addr = ram_addr - 1
+                        self.data_memory.write_word(ram_addr, self.program_counter.read())
+                        self.data_memory.dec_sp(2)
+                    else:
+                        pass  # Not handled yet!
+                    self.program_counter.write(new_pc)
+                else:
+                    # Jump
+                    self.instruction_str = "IJMP"
+                    self.program_counter.write(new_pc)
+                    
+                    
+            elif ((opcode_val & 0b1110000000000000) == 0b1100000000000000):
                 # Relative Jump/Call
                 offset = opcode_val & 0x0FFF
                 if (opcode_val & 0b0001000000000000):
@@ -199,6 +230,9 @@ if __name__=="__main__":
         flash.write(11, 0b1001010001011010)         # DEC   r5
         flash.write(12, 0b1101000000000000 + 5)     # RCALL +5
         flash.write(13, 0b1001010000001010)         # DEC   r0
+        flash.write(14, 0b1110000111101101)         # LDI   r30, $1D
+        flash.write(15, 0b1110000011110000)         # LDI   r31, $00
+        flash.write(16, 0b1001010000001001)         # IJMP
         flash.write(18, 0b1001010010001000)         # CLC
         flash.write(19, 0b1001010111100011)         # INC   r30
         flash.write(20, 0b1001010000001010)         # DEC   r0
