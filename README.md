@@ -11,12 +11,12 @@ Current set of instructions implemented:
 |             **ARITHMETIC AND LOGIC INSTRUCTIONS**           |||
 | ADD      | Add two registers                   |      x       |
 | ADC      | ADD with Carry                      |      x       |
-| ADIW     | Add immediate to word               |              |
+| ADIW     | Add immediate to word               |      x       |
 | SUB      | Subtract registers                  |              |
 | SUBI     | Subtract constant from register     |              |
 | SBC      | SUB with Carry                      |              |
 | SBCI     | SUBI with Carry                     |              |
-| SBIW     | Subtract immediate from word        |              |
+| SBIW     | Subtract immediate from word        |      x       |
 | AND      | Logical AND register                |              |
 | ANDI     | Logical AND immediate               |              |
 | OR       | Logical OR register                 |              |

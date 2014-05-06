@@ -75,6 +75,29 @@ class AVRInstructionDecoder(object):
                 self.operand1_str = "r" + str(Rd)
                 self.operand2_str = "r" + str(Rr)
 
+            elif ((opcode_val & 0b1111111000000000) == 0b1001011000000000):
+                # ADIW/SBIW (Add/Sub immediate to word)
+                Rd = (((opcode_val & 0x0030) >> 4) * 2) + 24
+                Rd1 = Rd + 1
+                K = ((opcode_val & 0x00C0) >> 2) + (opcode_val & 0x000F)
+                contents = (self.data_memory.memory[Rd1].read() << 8) & 0xFF00
+                contents = contents + (self.data_memory.memory[Rd].read() & 0xFF)
+                
+                if (opcode_val & 0x0100):
+                    # SBIW
+                    contents = contents - K
+                    self.instruction_str = "SBIW"
+                else:
+                    # ADIW
+                    contents = contents + K
+                    self.instruction_str = "ADIW"
+
+                self.data_memory.memory[Rd1].write(contents >> 8)
+                self.data_memory.memory[Rd].write(contents & 0xFF)
+                
+                self.operand1_str = "r" + str(Rd1) + ":" + str(Rd)
+                self.operand2_str = str(K)
+
             elif ((opcode_val & 0b1111111100001111) == 0b1001010000001000):
                 # Set/Clear bit in SREG
                 try:
@@ -244,6 +267,9 @@ if __name__=="__main__":
         flash.write(26, 0b0001110000000010)         # ADC   r0, r2
         flash.write(27, 0b1001010010001000)         # CLC
         flash.write(28, 0b1001010100001000)         # RET
+        flash.write(29, 0b1001011011010010)         # ADIW  r27:26, 50
+        flash.write(30, 0b1001011101011001)         # SBIW  r27:26, 25
+        flash.write(31, 0b1001011101101001)         # SBIW  r29:28, 25
         """
         """
         program_counter = AVRProgramCounter()
