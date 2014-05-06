@@ -9,18 +9,18 @@ Current set of instructions implemented:
 | Mnemonic |       Description                   | Implemented? |
 | -------- | ----------------------------------- |:------------:|
 |             **ARITHMETIC AND LOGIC INSTRUCTIONS**           |||
-| ADD      | Add two registers                   |      x       |
-| ADC      | ADD with Carry                      |      x       |
-| ADIW     | Add immediate to word               |      x       |
+| ADD      | Add two registers                   |       x      |
+| ADC      | ADD with Carry                      |       x      |
+| ADIW     | Add immediate to word               |       x      |
 | SUB      | Subtract registers                  |              |
-| SUBI     | Subtract constant from register     |              |
+| SUBI     | Subtract constant from register     |       x      |
 | SBC      | SUB with Carry                      |              |
-| SBCI     | SUBI with Carry                     |              |
-| SBIW     | Subtract immediate from word        |      x       |
+| SBCI     | SUBI with Carry                     |       x      |
+| SBIW     | Subtract immediate from word        |       x      |
 | AND      | Logical AND register                |              |
-| ANDI     | Logical AND immediate               |              |
+| ANDI     | Logical AND immediate               |       x      |
 | OR       | Logical OR register                 |              |
-| ORI      | Logical OR immediate                |              |
+| ORI      | Logical OR immediate                |       x      |
 | EOR      | Exclusive OR Registers              |              |
 | COM      | 1's compliment                      |       x      |
 | NEG      | 2's compliment                      |       x      |

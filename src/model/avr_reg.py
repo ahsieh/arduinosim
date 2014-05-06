@@ -76,6 +76,14 @@ class AVRRegister(AVRMemoryByte):
     def negate(self):
         self.contents = (0x00 - self.contents) & self.write_bitmask
 
+    # Logical AND
+    def logical_and(self, bm):
+        self.contents = self.contents & (bm & 0xFF)
+
+    # Logical OR
+    def logical_or(self, bm):
+        self.contents = self.contents | (bm & 0xFF)
+
     # Nibble swap
     # TODO?
 

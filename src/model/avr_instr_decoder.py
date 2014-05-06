@@ -66,11 +66,14 @@ class AVRInstructionDecoder(object):
 
             elif ((opcode_val & 0b1111110000000000) == 0b0001110000000000):
                 # ADC (Add with carry)
+                try:
+                    reg = next(r for r in self.data_memory.memory if r.name == "SREG")
+                except:
+                    pass
                 Rd = (opcode_val & 0x01F0) >> 4
                 Rr = (opcode_val & 0x000F) + ((opcode_val & 0x0200) >> 5)
-                carry = self.data_memory.memory[Rd].add(self.data_memory.memory[Rr].read())
-                if (carry):
-                    self.data_memory.memory[Rd].incr()
+                carry = reg.read() & 0x01
+                self.data_memory.memory[Rd].add(self.data_memory.memory[Rr].read() + carry)
                 self.instruction_str = "ADC"
                 self.operand1_str = "r" + str(Rd)
                 self.operand2_str = "r" + str(Rr)
@@ -97,6 +100,36 @@ class AVRInstructionDecoder(object):
                 
                 self.operand1_str = "r" + str(Rd1) + ":" + str(Rd)
                 self.operand2_str = str(K)
+
+            elif ((opcode_val & 0b1100000000000000) == 0b0100000000000000):
+                # Register Immediate Instructions (ORI, ANDI, etc.)
+                Rd = ((opcode_val & 0x00F0) >> 4) + 16
+                K = ((opcode_val & 0x0F00) >> 4) + (opcode_val & 0x000F)
+                try:
+                    reg = next(r for r in self.data_memory.memory if r.name == "SREG")
+                    carry = reg.read() & 0x01
+                except:
+                    pass
+
+                if (opcode_val & 0x3000 == 0x0000):
+                    # SBCI
+                    self.data_memory.memory[Rd].sub(K + carry)
+                    self.instruction_str = "SBCI"
+                elif (opcode_val & 0x3000 == 0x1000):
+                    # SUBI
+                    self.data_memory.memory[Rd].sub(K)
+                    self.instruction_str = "SUBI"
+                elif (opcode_val & 0x3000 == 0x2000):
+                    # ORI
+                    self.data_memory.memory[Rd].logical_or(K)
+                    self.instruction_str = "ORI"
+                elif (opcode_val & 0x3000 == 0x3000):
+                    # ANDI
+                    self.data_memory.memory[Rd].logical_and(K)
+                    self.instruction_str = "ANDI"
+                    
+                self.operand1_str = "r" + str(Rd)
+                self.operand2_str = "$" + str(K)
 
             elif ((opcode_val & 0b1111111100001111) == 0b1001010000001000):
                 # Set/Clear bit in SREG
@@ -269,7 +302,10 @@ if __name__=="__main__":
         flash.write(28, 0b1001010100001000)         # RET
         flash.write(29, 0b1001011011010010)         # ADIW  r27:26, 50
         flash.write(30, 0b1001011101011001)         # SBIW  r27:26, 25
-        flash.write(31, 0b1001011101101001)         # SBIW  r29:28, 25
+        flash.write(31, 0b0101000000001000)         # SUBI  r16, $8
+        flash.write(32, 0b0100000100010111)         # SBCI  r17, $23
+        flash.write(33, 0b0111101000001010)         # ANDI  r18, $AA
+        flash.write(34, 0b0110000000011111)         # ORI   r19, $0F
         """
         """
         program_counter = AVRProgramCounter()
