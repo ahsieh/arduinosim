@@ -13,11 +13,12 @@ class AVRInstructionDecoder(object):
     
     # Override methods
     # Initialization
-    def __init__(self, data_memory, program_counter):
+    def __init__(self, data_memory, flash, program_counter):
         self.instruction_str = ""
         self.operand1_str = ""
         self.operand2_str = ""
         self.data_memory = data_memory
+        self.flash = flash
         self.program_counter = program_counter
         self.instr_addr = self.program_counter.read()
 
@@ -64,17 +65,44 @@ class AVRInstructionDecoder(object):
                 self.operand1_str = "r" + str(Rd)
                 self.operand2_str = "r" + str(Rr)
 
-            elif ((opcode_val & 0b1111110000000000) == 0b0001110000000000):
-                # ADC (Add with carry)
+            elif ((opcode_val & 0b1111000000000000) == 0b0001000000000000):
                 try:
                     reg = next(r for r in self.data_memory.memory if r.name == "SREG")
                 except:
                     pass
                 Rd = (opcode_val & 0x01F0) >> 4
                 Rr = (opcode_val & 0x000F) + ((opcode_val & 0x0200) >> 5)
-                carry = reg.read() & 0x01
-                self.data_memory.memory[Rd].add(self.data_memory.memory[Rr].read() + carry)
-                self.instruction_str = "ADC"
+
+                if ((opcode_val & 0x0C00) == 0x0800):
+                    self.data_memory.memory[Rd].sub(self.data_memory.memory[Rr].read())
+                    self.instruction_str = "SUB"
+                elif ((opcode_val & 0x0C00) == 0x0400):
+                    result = self.data_memory.memory[Rd].read() - self.data_memory.memory[Rr].read()
+                    if (result == 0):
+                        reg.set_bits(reg.sreg_z)
+                    else:
+                        reg.clear_bits(reg.sreg_z)
+                    if (result & 0x80):
+                        reg.set_bits(reg.sreg_n)
+                    else:
+                        reg.clear_bits(reg.sreg_n)
+
+                    self.instruction_str = "CP"
+                elif ((opcode_val & 0x0C00) == 0x0000):
+                    result = self.data_memory.memory[Rd].read() - self.data_memory.memory[Rr].read()
+                    if (result == 0):
+                        next_opcode_val = self.flash.get(self.program_counter.read() + 1).read()
+                        if (((next_opcode_val & 0xFE0C) == 0x940C) or ((next_opcode_val & 0xFC0F) == 0x9000)):
+                            self.program_counter.add(2)
+                        else:
+                            self.program_counter.add(1)
+                    self.instruction_str = "CPSE"
+                elif ((opcode_val & 0x0C00) == 0x0C00):
+                    carry = reg.read() & 0x01
+                    self.data_memory.memory[Rd].add(self.data_memory.memory[Rr].read() + carry)
+                    self.instruction_str = "ADC"
+
+
                 self.operand1_str = "r" + str(Rd)
                 self.operand2_str = "r" + str(Rr)
 
@@ -101,6 +129,22 @@ class AVRInstructionDecoder(object):
                 self.operand1_str = "r" + str(Rd1) + ":" + str(Rd)
                 self.operand2_str = str(K)
 
+            elif ((opcode_val & 0b1111000000000000) == 0b0011000000000000):
+                # CPI (Compare immediate)
+                Rd = ((opcode_val & 0x00F0) >> 4) + 16
+                K = ((opcode_val & 0x0F00) >> 4) + (opcode_val & 0x000F)
+                try:
+                    reg = next(r for r in self.data_memory.memory if r.name == "SREG")
+                except:
+                    pass
+
+                if (self.data_memory.memory[Rd].read() - K == 0):
+                    reg.set_bits(0x02)
+
+                self.instruction_str = "CPI"
+                self.operand1_str = "r" + str(Rd)
+                self.operand2_str = "$" + str(K)
+                
             elif ((opcode_val & 0b1100000000000000) == 0b0100000000000000):
                 # Register Immediate Instructions (ORI, ANDI, etc.)
                 Rd = ((opcode_val & 0x00F0) >> 4) + 16
@@ -230,6 +274,20 @@ class AVRInstructionDecoder(object):
                     self.program_counter.add(opcode_val & 0x07FF)
                     self.operand1_str = "+" + str(opcode_val & 0x07FF)
 
+            elif ((opcode_val & 0b1111111000001100) == 0b1001010000001100):
+                # JMP/CALL abs22
+                next_opcode_val = self.flash.get(self.program_counter.read() + 1).read()
+                k = (((opcode_val & 0x1F0) >> 3) + (opcode_val & 0x01)) << 16
+                k = (k & 0x3F0000) + (next_opcode_val & 0xFFFF)
+                if (opcode_val & 0x2):
+                    # CALL
+                    self.instruction_str = "CALL"
+                else:
+                    # JMP
+                    self.program_counter.write(k - 1)
+                    self.instruction_str = "JMP"
+                    self.operand1_str = "$" + str(k)
+
             elif ((opcode_val & 0b1111111100001111) == 0b1001010100001000):
                 # Misc. (RET, RETI, )
                 if (self.data_memory.sram_size < 0x1000):
@@ -304,12 +362,21 @@ if __name__=="__main__":
         flash.write(30, 0b1001011101011001)         # SBIW  r27:26, 25
         flash.write(31, 0b0101000000001000)         # SUBI  r16, $8
         flash.write(32, 0b0100000100010111)         # SBCI  r17, $23
-        flash.write(33, 0b0111101000001010)         # ANDI  r18, $AA
-        flash.write(34, 0b0110000000011111)         # ORI   r19, $0F
+        flash.write(33, 0b0111101000001010)         # ANDI  r16, $AA
+        flash.write(34, 0b0110000000011111)         # ORI   r17, $0F
+        flash.write(35, 0b1110001101001010)         # LDI   r20, $58
+        flash.write(36, 0b1110001001010000)         # LDI   r21, $32
+        flash.write(37, 0b0001101101000101)         # SUB   r20, r21
+        flash.write(38, 0b0001000001100111)         # CPSE  r6, r7
+        flash.write(39, 0b1001010010001000)         # CLC (should not execute)
+        flash.write(40, 0b1001010010001000)         # CLC (SHOULD execute)
+        flash.write(41, 0b0001000000110100)         # CPSE  r3, r4
+        flash.write(42, 0b1001010000001100)         # JMP, $50
+        flash.write(43, 0b0000000000110010)         # Absolute Address (lower 16 bits)
         """
         """
         program_counter = AVRProgramCounter()
-        decoder = AVRInstructionDecoder(sram, program_counter)
+        decoder = AVRInstructionDecoder(sram, flash, program_counter)
 
         while (decoder.instruction_str != "NOP"):
             decoder.load(flash.get(program_counter.read()))

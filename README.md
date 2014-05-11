@@ -12,7 +12,7 @@ Current set of instructions implemented:
 | ADD      | Add two registers                   |       x      |
 | ADC      | ADD with Carry                      |       x      |
 | ADIW     | Add immediate to word               |       x      |
-| SUB      | Subtract registers                  |              |
+| SUB      | Subtract registers                  |       x      |
 | SUBI     | Subtract constant from register     |       x      |
 | SBC      | SUB with Carry                      |              |
 | SBCI     | SUBI with Carry                     |       x      |
@@ -40,14 +40,14 @@ Current set of instructions implemented:
 |                    **BRANCH INSTRUCTIONS**                  |||
 | RJMP     | Relative jump                       |       x      |
 | IJMP     | Indirect jump to (Z)                |       x      |
-| JMP      | Direct jump                         |              |
+| JMP      | Direct jump                         |       x      |
 | RCALL    | Relative subroutine call            |       x      |
 | ICALL    | Indirect call to (Z)                |       x      |
 | CALL     | Direct subroutine call              |              |
 | RET      | Subroutine return                   |       x      |
 | RETI     | Interrupt return                    |       x      |
-| CPSE     |                                     |              |
-| CP       |                                     |              |
+| CPSE     |                                     |       x      |
+| CP       |                                     |       x      |
 | CPC      |                                     |              |
 | CPI      |                                     |              |
 | SBRC     |                                     |              |

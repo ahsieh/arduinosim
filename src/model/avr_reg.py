@@ -7,6 +7,14 @@ from avr_mem import AVRMemoryByte
 ## Generic Memory Byte Object 
 class AVRRegister(AVRMemoryByte):
     # Instance variables
+    sreg_c = 0b00000001
+    sreg_z = 0b00000010
+    sreg_n = 0b00000100
+    sreg_v = 0b00001000
+    sreg_s = 0b00010000
+    sreg_h = 0b00100000
+    sreg_t = 0b01000000
+    sreg_i = 0b10000000
 
     # Override methods
     # Initialization
